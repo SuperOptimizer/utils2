@@ -127,12 +127,12 @@ private:
         }
     }
 
-    std::vector<std::jthread>            workers_;
     std::queue<std::function<void()>>    queue_;
     mutable std::mutex                   mu_;
     std::condition_variable              cv_;
     std::condition_variable              idle_cv_;
     std::atomic<std::size_t>             active_;
+    std::vector<std::jthread>            workers_;  // Must be last: destroyed first to join threads
 };
 
 // ---------------------------------------------------------------------------
