@@ -1,0 +1,110 @@
+# Helper function to add a test for a specific header
+function(add_utils2_test name)
+    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test_${name}.cpp")
+        message(STATUS "Skipping test_${name} (source file not found)")
+        return()
+    endif()
+    add_executable(test_${name} test_${name}.cpp)
+    target_link_libraries(test_${name} PRIVATE utils2)
+    target_compile_features(test_${name} PRIVATE cxx_std_26)
+    if(UTILS2_COVERAGE)
+        target_compile_options(test_${name} PRIVATE --coverage)
+        target_link_options(test_${name} PRIVATE --coverage)
+    endif()
+    add_test(NAME ${name} COMMAND test_${name})
+endfunction()
+
+# Tier 1: Foundation
+add_utils2_test(vec)
+add_utils2_test(hash)
+add_utils2_test(mdspan_util)
+add_utils2_test(log)
+
+# Tier 2: Data Structures
+add_utils2_test(lru_cache)
+add_utils2_test(lock_pool)
+add_utils2_test(priority_queue)
+add_utils2_test(spatial_index)
+add_utils2_test(disjoint_set)
+add_utils2_test(grid_store)
+
+# Tier 3: Algorithms
+add_utils2_test(interpolate)
+add_utils2_test(connected_components)
+add_utils2_test(distance_transform)
+add_utils2_test(pathfinding)
+add_utils2_test(compositing)
+add_utils2_test(morphology)
+add_utils2_test(statistics)
+
+# Tier 4: I/O & Systems
+add_utils2_test(thread_pool)
+add_utils2_test(tiered_cache)
+add_utils2_test(disk_store)
+add_utils2_test(zarr)
+
+# Link compression libraries needed by zarr/compression
+find_package(PkgConfig QUIET)
+if(PkgConfig_FOUND)
+    pkg_check_modules(ZSTD IMPORTED_TARGET libzstd)
+    pkg_check_modules(LZ4 IMPORTED_TARGET liblz4)
+    pkg_check_modules(ZLIB IMPORTED_TARGET zlib)
+endif()
+# Direct library fallbacks
+find_library(BLOSC_LIB blosc)
+find_library(BLOSC2_LIB blosc2)
+find_library(ZSTD_LIB zstd)
+find_library(LZ4_LIB lz4)
+find_library(ZLIB_LIB z)
+
+if(TARGET test_zarr)
+    if(ZSTD_LIB)
+        target_link_libraries(test_zarr PRIVATE ${ZSTD_LIB})
+    endif()
+    if(LZ4_LIB)
+        target_link_libraries(test_zarr PRIVATE ${LZ4_LIB})
+    endif()
+    if(ZLIB_LIB)
+        target_link_libraries(test_zarr PRIVATE ${ZLIB_LIB})
+    endif()
+    if(BLOSC_LIB)
+        target_link_libraries(test_zarr PRIVATE ${BLOSC_LIB})
+    endif()
+    if(BLOSC2_LIB)
+        target_link_libraries(test_zarr PRIVATE ${BLOSC2_LIB})
+    endif()
+endif()
+
+add_utils2_test(compression)
+if(TARGET test_compression)
+    if(ZSTD_LIB)
+        target_link_libraries(test_compression PRIVATE ${ZSTD_LIB})
+    endif()
+    if(LZ4_LIB)
+        target_link_libraries(test_compression PRIVATE ${LZ4_LIB})
+    endif()
+    if(ZLIB_LIB)
+        target_link_libraries(test_compression PRIVATE ${ZLIB_LIB})
+    endif()
+    if(BLOSC_LIB)
+        target_link_libraries(test_compression PRIVATE ${BLOSC_LIB})
+    endif()
+    if(BLOSC2_LIB)
+        target_link_libraries(test_compression PRIVATE ${BLOSC2_LIB})
+    endif()
+endif()
+
+add_utils2_test(tiff)
+
+# Tier 5: Domain-Specific
+add_utils2_test(surface)
+add_utils2_test(mesh_flatten)
+add_utils2_test(cost_functions)
+
+# Tier 4.5: JSON
+add_utils2_test(json)
+
+# Utilities
+add_utils2_test(argparse)
+add_utils2_test(timer)
+add_utils2_test(connectivity)

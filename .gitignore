@@ -39,3 +39,24 @@
 
 # debug information files
 *.dwo
+
+# Build directories
+build*/
+cmake-build-*/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Coverage
+*.gcda
+*.gcno
+*.gcov
+coverage/
+
+# OS
+.DS_Store
+Thumbs.db
